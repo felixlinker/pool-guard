@@ -1,10 +1,11 @@
 from datetime import datetime
 from datetime import datetime, timedelta
+from spond import spond
 
 TCZ_ID = '3C7EBA9E0BB04B59A19784F1594EC57B'
 
 class Event:
-  def __init__(self, client, uid: str, event_dict=None):
+  def __init__(self, client: spond.Spond, uid: str, event_dict=None):
     self.client = client
     self.uid = uid
 
