@@ -1,9 +1,12 @@
 from argparse import ArgumentParser
 from spond import spond
-from datetime import datetime, timedelta
 import asyncio
+import signal
+from events import swim_trainings
+from functools import reduce
+import datetime
 
-TCZ_ID = '3C7EBA9E0BB04B59A19784F1594EC57B'
+WAITLIST_CUT_OFF = datetime.timedelta(hours=1)
 
 parser = ArgumentParser()
 parser.add_argument('-i', '--interval', default=300)
@@ -12,29 +15,64 @@ parser.add_argument('-u', '--user')
 
 args = parser.parse_args()
 
-def next_week_day(today_index, target_index):
-  return (7 - (today_index - target_index)) % 7
-
-def next_thursday(today_index):
-  return next_week_day(today_index, 3)
-
 async def main():
-  s = spond.Spond(username=args.user, password=args.password)
+  client = spond.Spond(username=args.user, password=args.password)
   try:
-    now = datetime.today()
-    friday = now + timedelta(days=next_thursday(now.weekday()) + 1)
-    tuesday = now + timedelta(days=next_thursday(now.weekday()) - 2)
-    events = await s.get_events(
-      group_id=TCZ_ID,
-      include_scheduled=True,
-      min_start=tuesday,
-      max_end=friday
-    )
+    t1 = asyncio.create_task(capture_sigint())
+    t2 = asyncio.create_task(waitlist_guard(client))
+    await asyncio.gather(t1, t2)
+  except Terminate:
+    print('\nShutting down...')
+    t1.cancel()
+    t2.cancel()
+  finally:
+    client.clientsession.close()
 
-    swim_trainings = list(map(lambda e: e['id'], filter(lambda e: e['heading'] == "TCZ Schwimtraining", events)))
+class Terminate(Exception):
+  pass
+
+async def capture_sigint():
+  '''
+  This function blocks until Ctrl+C is pressed, then raises the Terminate
+  exception.
+  '''
+  print('Press Ctrl+C to stop bot')
+  signal.sigwait([signal.SIGINT])
+  raise Terminate()
+
+async def waitlist_guard(client):
+  try:
+    trainings = await swim_trainings(client)
+    if len(trainings) == 0:
+      raise Exception('No swim trainings found')
+
+    while True:
+      # Deregister people who go to all swim trainings from one training that
+      # hasn't started if all trainings are full
+      all_full = reduce(lambda s, t: s and t.is_overbooked(), trainings)
+      if all_full:
+        registered = map(lambda tr: tr.get_registered(), trainings)
+        go_to_all = reduce(lambda s, a: s.intersection(a), registered)
+        for attendant in go_to_all:
+          havent_started = filter(lambda tr: not tr.has_started(), trainings)
+          to_delete_from = min(havent_started, key=lambda tr: tr.signed_up_at(attendant))
+          print(f'Deregistering {attendant} (max sign-ups)')
+          to_delete_from.deregister(attendant)
+
+      # Deregister people who have been on the waitlist for too long
+      for training in trainings:
+        for (attendant, on_waitlist_since) in training.on_waitlist_since():
+          if on_waitlist_since >= WAITLIST_CUT_OFF:
+            print(f'Deregistering {attendant} (waitlist cut off)')
+            training.deregister(attendant)
+
+      await asyncio.sleep(180)
+      for training in trainings:
+        await training.refresh()
+  except asyncio.CancelledError:
+    pass
   except Exception as e:
     print(e)
-  finally:
-    await s.clientsession.close()
+    raise Terminate()
 
 asyncio.run(main())
