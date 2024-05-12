@@ -22,13 +22,12 @@ parser = ArgumentParser()
 parser.add_argument('-i', '--interval', default=300)
 parser.add_argument('-p', '--password')
 parser.add_argument('-u', '--user')
-parser.add_argument('-l', '--log-level', default=logging.INFO,
-                    choices=LOG_LEVELS.keys(), type=lambda l: LOG_LEVELS[l])
+parser.add_argument('-l', '--log-level', default='INFO', choices=LOG_LEVELS.keys())
 
 args = parser.parse_args()
 logging.basicConfig(
   filename=f'waitlist-{datetime.datetime.now().strftime('%y-%m-%d %H:%M:%S')}.log',
-  level=args.log_level,
+  level=LOG_LEVELS[args.log_level],
 )
 
 async def main():
