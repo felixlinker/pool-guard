@@ -1,6 +1,8 @@
 from datetime import datetime
 from datetime import datetime, timedelta
 from spond import spond
+import logging
+logger = logging.getLogger(__name__)
 
 TCZ_ID = '3C7EBA9E0BB04B59A19784F1594EC57B'
 
@@ -13,15 +15,20 @@ class Event:
     self.waiting_list = dict()
     self.unconfirmed = dict()
     self.starts_at = None
+    self.name = None
 
     if event_dict is not None:
       self.__read_from(event_dict)
 
   def __read_from(self, event_dict):
+    self.name = event_dict['heading']
     self.starts_at = datetime.fromisoformat(event_dict['startTimestamp'])
     self.accepted = get_signup_times(event_dict['responses']['acceptedIds'], older=self.accepted)
     self.waiting_list = get_signup_times(event_dict['responses']['waitinglistIds'], older=self.waiting_list)
     self.unconfirmed = get_signup_times(event_dict['responses']['unconfirmedIds'], older=self.unconfirmed)
+
+  def __str__(self) -> str:
+    return f'{self.name} ({self.starts_at})'
 
   def has_started(self) -> bool:
     now = datetime.now(tz=self.starts_at.tzinfo)
