@@ -51,7 +51,7 @@ async def waitlist_guard(client):
     if len(trainings) == 0:
       raise Exception('No swim trainings found')
 
-    logger.debug(f'Found {len(trainings)} trainings at f{', '.join(map(lambda t: t.starts_at, trainings))}')
+    logger.debug(f'Found {len(trainings)} trainings at {', '.join(map(lambda t: str(t.starts_at), trainings))}')
     while True:
       # Deregister people who go to all swim trainings from one training that
       # hasn't started if all trainings are full
@@ -72,7 +72,7 @@ async def waitlist_guard(client):
             logger.info(f'Deregistering {attendant} at {training} (waitlist cut off)')
             training.deregister(attendant)
 
-      await asyncio.sleep(180)
+      await asyncio.sleep(args.interval)
       logger.debug('Refreshing')
       for training in trainings:
         await training.refresh()
