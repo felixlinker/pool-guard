@@ -84,6 +84,7 @@ async def waitlist_guard(client):
             training.deregister(attendant)
 
       await asyncio.sleep(180)
+      logger.debug('Refreshing')
       for training in trainings:
         await training.refresh()
   except asyncio.CancelledError:

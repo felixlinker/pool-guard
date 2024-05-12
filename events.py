@@ -81,6 +81,8 @@ async def swim_trainings(client) -> list[Event]:
 def get_signup_times(attendants: list[str], older=dict()) -> dict[str, datetime]:
   now = datetime.now()
   def to_entry(attendant):
+    if older.get(attendant) is None:
+      logger.debug(f'{attendant} signed-up just before f{now}')
     return (attendant, older.get(attendant, now))
 
   return dict(map(to_entry, attendants))
