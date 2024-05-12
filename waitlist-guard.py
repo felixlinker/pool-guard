@@ -20,7 +20,7 @@ LOG_LEVELS = {
 }
 
 parser = ArgumentParser()
-parser.add_argument('-i', '--interval', default=300)
+parser.add_argument('-i', '--interval', default=300, type=int)
 parser.add_argument('-p', '--password')
 parser.add_argument('-u', '--user')
 parser.add_argument('-l', '--log-level', default='INFO', choices=LOG_LEVELS.keys())
