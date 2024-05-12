@@ -63,14 +63,14 @@ async def waitlist_guard(client):
           havent_started = filter(lambda tr: not tr.has_started(), trainings)
           to_delete_from = min(havent_started, key=lambda tr: tr.signed_up_at(attendant))
           logger.info(f'Deregistering {attendant} at {to_delete_from} (max sign-ups)')
-          to_delete_from.deregister(attendant)
+          # to_delete_from.deregister(attendant)
 
       # Deregister people who have been on the waitlist for too long
       for training in trainings:
         for (attendant, on_waitlist_since) in training.on_waitlist_since():
           if on_waitlist_since >= WAITLIST_CUT_OFF:
             logger.info(f'Deregistering {attendant} at {training} (waitlist cut off)')
-            training.deregister(attendant)
+            # training.deregister(attendant)
 
       await asyncio.sleep(args.interval)
       logger.debug('Refreshing')
