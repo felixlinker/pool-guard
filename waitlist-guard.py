@@ -38,27 +38,12 @@ if args.user is None or args.password is None:
 async def main():
   client = spond.Spond(username=args.user, password=args.password)
   try:
-    t1 = asyncio.create_task(capture_sigint())
-    t2 = asyncio.create_task(waitlist_guard(client))
-    await asyncio.gather(t1, t2)
-  except Terminate:
-    logger.info('Shutting down...')
-    t1.cancel()
-    t2.cancel()
+    task = asyncio.create_task(waitlist_guard(client))
+    signal.signal(signal.SIGINT, lambda s, f: task.cancel())
+    print('Press Ctrl+C to exit')
+    await task
   finally:
-    client.clientsession.close()
-
-class Terminate(Exception):
-  pass
-
-async def capture_sigint():
-  '''
-  This function blocks until Ctrl+C is pressed, then raises the Terminate
-  exception.
-  '''
-  logger.info('Press Ctrl+C to stop bot')
-  signal.sigwait([signal.SIGINT])
-  raise Terminate()
+    await client.clientsession.close()
 
 async def waitlist_guard(client):
   try:
@@ -93,8 +78,5 @@ async def waitlist_guard(client):
         await training.refresh()
   except asyncio.CancelledError:
     pass
-  except Exception as e:
-    logger.error(e)
-    raise Terminate()
 
 asyncio.run(main())
