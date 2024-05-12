@@ -6,6 +6,7 @@ from events import swim_trainings
 from functools import reduce
 import datetime
 import logging
+import sys
 logger = logging.getLogger(__name__)
 
 WAITLIST_CUT_OFF = datetime.timedelta(hours=1)
@@ -29,6 +30,10 @@ logging.basicConfig(
   filename=f'waitlist-{datetime.datetime.now().strftime('%y-%m-%d %H:%M:%S')}.log',
   level=LOG_LEVELS[args.log_level],
 )
+
+if args.user is None or args.password is None:
+  logger.critical('Please provide username and password')
+  sys.exit(1)
 
 async def main():
   client = spond.Spond(username=args.user, password=args.password)
