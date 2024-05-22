@@ -73,7 +73,7 @@ async def waitlist_guard(client):
       for training in trainings:
         for (attendant, on_waitlist_since) in training.on_waitlist_since():
           if on_waitlist_since >= WAITLIST_CUT_OFF:
-            logger.info(f'Deregistering {attendant} at {training} (waitlist cut off)')
+            logger.info(f'Deregistering {training.get_participant_name(attendant)} (ID: {attendant}) at {training} (waitlist cut off)')
             training.deregister(attendant)
 
       await asyncio.sleep(args.interval)
