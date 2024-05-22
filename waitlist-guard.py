@@ -62,7 +62,7 @@ async def waitlist_guard(client):
         for attendant in go_to_all:
           havent_started = filter(lambda tr: not tr.has_started(), trainings)
           to_delete_from = min(havent_started, key=lambda tr: tr.signed_up_at(attendant))
-          logger.info(f'Deregistering {attendant} at {to_delete_from} (max sign-ups)')
+          logger.info(f'Deregistering {to_delete_from.get_participant_name(attendant)} (ID: {attendant}) at {to_delete_from} (max sign-ups)')
           # to_delete_from.deregister(attendant)
 
       # Deregister people who have been on the waitlist for too long

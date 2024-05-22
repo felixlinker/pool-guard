@@ -16,9 +16,14 @@ class Event:
     self.unconfirmed = dict()
     self.starts_at = None
     self.name = None
+    self.participant_names = dict()
 
     if event_dict is not None:
       self.__read_from(event_dict)
+      self.participant_names = dict(map(
+        lambda member: (member['id'], ' '.join([member.get('firstName', ''), member.get('lastName', '')])),
+        event_dict['recipients']['group']['members']
+      ))
 
   def __read_from(self, event_dict):
     self.name = event_dict['heading']
@@ -46,6 +51,11 @@ class Event:
 
   def is_overbooked(self) -> bool:
     return 0 < len(self.waiting_list)
+
+  def get_participant_name(self, id) -> str:
+    # Don't use .get default value for name not found because the API might not
+    # return a name, which will result in storing an empty string in the dict.
+    return self.participant_names.get(id, None) or '<name not found>'
 
   async def deregister(self, uid):
     await self.client.update_response(self.uid, uid, False)
