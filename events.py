@@ -41,7 +41,7 @@ class Event:
     return self.accepted[uid] or self.waiting_list[uid]
 
   def on_waitlist_since(self) -> list[tuple[str, datetime]]:
-    now = datetime.now(tz=self.starts_at.tzinfo)
+    now = datetime.now()
     return [ (a, now - dt) for (a, dt) in self.waiting_list.items()]
 
   def is_overbooked(self) -> bool:
