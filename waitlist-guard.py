@@ -27,7 +27,7 @@ parser.add_argument('-l', '--log-level', default='INFO', choices=LOG_LEVELS.keys
 
 args = parser.parse_args()
 logging.basicConfig(
-  filename=f'waitlist-{datetime.datetime.now().strftime('%y-%m-%d %H:%M:%S')}.log',
+  filename=f'waitlist-{datetime.datetime.now().strftime('%y-%m-%d@%H:%M:%S')}.log',
   level=LOG_LEVELS[args.log_level],
 )
 
