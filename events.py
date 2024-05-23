@@ -69,6 +69,10 @@ class Event:
     await self.client.update_response(self.uid, uid, False)
 
   async def refresh(self):
+    # Do not update events that have started to discourage deregistering after
+    # an event has ended.
+    if self.has_started():
+      return
     response = await self.client.get_event(self.uid)
     self.__read_from(response)
 
