@@ -56,7 +56,7 @@ async def waitlist_guard(client):
       # Deregister people who go to all swim trainings from one training that
       # hasn't started and is full if some training that hasn't started yet is
       # full
-      any_full = reduce(lambda s, t: s or (not t.has_started() and t.is_overbooked()), trainings)
+      any_full = reduce(lambda s, t: s or (not t.has_started() and t.is_overbooked()), trainings, False)
       if any_full:
         registered = map(lambda tr: tr.get_registered(), trainings)
         go_to_all = reduce(lambda s, a: s.intersection(a), registered)
