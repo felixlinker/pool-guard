@@ -78,6 +78,7 @@ async def waitlist_guard(client):
 
       await asyncio.sleep(args.interval)
       logger.debug('Refreshing')
+      await swim_trainings(client, parse=False)  # API query to refresh events
       for training in trainings:
         await training.refresh()
   except asyncio.CancelledError:

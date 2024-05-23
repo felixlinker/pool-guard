@@ -82,7 +82,7 @@ def next_week_day(today_index, target_index):
 def next_thursday(today_index):
   return next_week_day(today_index, 3)
 
-async def swim_trainings(client) -> list[Event]:
+async def swim_trainings(client, parse=True) -> list[Event]:
   now = datetime.today()
   friday = now + timedelta(days=next_thursday(now.weekday()) + 1)
   tuesday = now + timedelta(days=next_thursday(now.weekday()) - 2)
@@ -92,6 +92,9 @@ async def swim_trainings(client) -> list[Event]:
     min_start=tuesday,
     max_end=friday
   )
+
+  if not parse:
+    return []
 
   return list(
     map(
