@@ -63,9 +63,9 @@ class Event:
     return self.participant_names.get(id, None) or '<name not found>'
 
   async def deregister(self, uid):
-    del self.accepted[uid]
-    del self.waiting_list[uid]
-    del self.unconfirmed[uid]
+    self.accepted.pop(uid, None)
+    self.waiting_list.pop(uid, None)
+    self.unconfirmed.pop(uid, None)
     await self.client.update_response(self.uid, uid, False)
 
   async def refresh(self):
