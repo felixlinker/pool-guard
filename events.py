@@ -17,6 +17,7 @@ class Event:
     self.starts_at = None
     self.name = None
     self.participant_names = dict()
+    self.max_accepted = 25
 
     if event_dict is not None:
       self.__read_from(event_dict)
@@ -24,6 +25,7 @@ class Event:
         lambda member: (member['id'], ' '.join([member.get('firstName', ''), member.get('lastName', '')])),
         event_dict['recipients']['group']['members']
       ))
+      self.max_accepted = event_dict['maxAccepted']
 
   def __read_from(self, event_dict):
     self.name = event_dict['heading']
@@ -50,7 +52,10 @@ class Event:
     return [ (a, now - dt) for (a, dt) in self.waiting_list.items()]
 
   def is_overbooked(self) -> bool:
-    return 0 < len(self.waiting_list)
+    # Do this arithmetic because deregistering via my API does not cause a
+    # refresh but deletes participants from all dicts. Here, I check whether
+    # people _would have_ jumped into unconfirmed from the waiting_list.
+    return 0 < len(self.waiting_list) + (len(self.accepted) + len(self.unconfirmed) - self.max_accepted)
 
   def get_participant_name(self, id) -> str:
     # Don't use .get default value for name not found because the API might not
