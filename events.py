@@ -40,7 +40,7 @@ class Event:
     return self.starts_at <= now
 
   def get_registered(self) -> set[str]:
-    return set(self.accepted.keys()).union(self.waiting_list.keys())
+    return set(self.accepted.keys()).union(self.unconfirmed.keys())
 
   def signed_up_at(self, uid) -> datetime:
     return self.accepted[uid] or self.waiting_list[uid]
