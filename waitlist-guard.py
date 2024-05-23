@@ -62,7 +62,7 @@ async def waitlist_guard(client):
         go_to_all = reduce(lambda s, a: s.intersection(a), registered)
         for attendant in go_to_all:
           havent_started = filter(lambda tr: not tr.has_started(), trainings)
-          are_full = filter(lambda tr: tr, havent_started)
+          are_full = filter(lambda tr: tr.is_overbooked(), havent_started)
           # Deregister participant from the event they signed up first, i.e.,
           # don't delete the newer sign-up.
           to_delete_from = min(are_full, key=lambda tr: tr.signed_up_at(attendant))
