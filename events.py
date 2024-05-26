@@ -47,9 +47,9 @@ class Event:
   def signed_up_at(self, uid) -> datetime:
     return self.accepted[uid] or self.waiting_list[uid]
 
-  def on_waitlist_since(self) -> list[tuple[str, datetime]]:
+  def unconfirmed_since(self) -> list[tuple[str, datetime]]:
     now = datetime.now()
-    return [ (a, now - dt) for (a, dt) in self.waiting_list.items()]
+    return [ (a, now - dt) for (a, dt) in self.unconfirmed.items()]
 
   def is_overbooked(self) -> bool:
     # Do this arithmetic because deregistering via my API does not cause a

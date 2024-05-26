@@ -69,10 +69,10 @@ async def waitlist_guard(client):
           logger.info(f'Deregistering {to_delete_from.get_participant_name(attendant)} (ID: {attendant}) at {to_delete_from} (max sign-ups)')
           await to_delete_from.deregister(attendant)
 
-      # Deregister people who have been on the waitlist for too long
+      # Deregister people who have been in state unconfirmed for too long
       for training in trainings:
-        for (attendant, on_waitlist_since) in training.on_waitlist_since():
-          if on_waitlist_since >= WAITLIST_CUT_OFF:
+        for (attendant, unconfirmed_since) in training.unconfirmed_since():
+          if unconfirmed_since >= WAITLIST_CUT_OFF:
             logger.info(f'Deregistering {training.get_participant_name(attendant)} (ID: {attendant}) at {training} (waitlist cut off)')
             await training.deregister(attendant)
 
