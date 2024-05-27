@@ -9,7 +9,7 @@ import logging
 import sys
 logger = logging.getLogger(__name__)
 
-WAITLIST_CUT_OFF = datetime.timedelta(hours=1)
+WAITLIST_CUT_OFF = datetime.timedelta(hours=4)
 
 LOG_LEVELS = {
   'DEBUG': logging.DEBUG,
