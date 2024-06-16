@@ -53,16 +53,17 @@ async def waitlist_guard(client):
 
     logger.debug(f'Found {len(trainings)} trainings at {', '.join(map(lambda t: str(t.starts_at), trainings))}')
     while True:
+      registered = list(map(lambda tr: tr.get_registered(), trainings))
+      go_to_some = reduce(lambda s, a: s.union(a), registered)
+      go_to_all = reduce(lambda s, a: s.intersection(a), registered)
       # Deregister people who go to all swim trainings from one training that
       # hasn't started and is full if some training that hasn't started yet is
       # full
-      any_full = reduce(lambda s, t: s or (not t.has_started() and t.is_overbooked()), trainings, False)
-      if any_full:
-        registered = map(lambda tr: tr.get_registered(), trainings)
-        go_to_all = reduce(lambda s, a: s.intersection(a), registered)
+      all_full = reduce(lambda s, t: s and (not t.has_started() and t.is_overbooked(go_to_some)), trainings, True)
+      if all_full:
         for attendant in go_to_all:
           havent_started = filter(lambda tr: not tr.has_started(), trainings)
-          are_full = filter(lambda tr: tr.is_overbooked(), havent_started)
+          are_full = filter(lambda tr: tr.is_overbooked(go_to_some), havent_started)
           # Deregister participant from the event they signed up first, i.e.,
           # don't delete the newer sign-up.
           to_delete_from = min(are_full, key=lambda tr: tr.signed_up_at(attendant))

@@ -51,11 +51,13 @@ class Event:
     now = datetime.now()
     return [ (a, now - dt) for (a, dt) in self.unconfirmed.items()]
 
-  def is_overbooked(self) -> bool:
+  def is_overbooked(self, attend_some_training) -> bool:
+    # Don't consider people on the waitlist who already attend a different training
+    wl = list(filter(lambda a: a not in attend_some_training, self.waiting_list))
     # Do this arithmetic because deregistering via my API does not cause a
     # refresh but deletes participants from all dicts. Here, I check whether
     # people _would have_ jumped into unconfirmed from the waiting_list.
-    return 0 < len(self.waiting_list) + (len(self.accepted) + len(self.unconfirmed) - self.max_accepted)
+    return 0 < len(wl) + (len(self.accepted) + len(self.unconfirmed) - self.max_accepted)
 
   def get_participant_name(self, id) -> str:
     # Don't use .get default value for name not found because the API might not
